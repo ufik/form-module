@@ -47,6 +47,8 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 				$form->addCheckbox($element->getName(), $element->getLabel());
 			}
 			
+			$form[$element->getName()]->setAttribute('class', 'form-control');
+			
 			if($element->getRequired()){
 				$form[$element->getName()]->setRequired($element->getDescription());
 			}
