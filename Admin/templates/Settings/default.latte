@@ -4,12 +4,39 @@
 
 	<h1>{$actualPage->getTitle()} - {_'Settings'}</h1>
 	
-	<a class="btn btn-primary ajax" n:href="updateElement idPage => $idPage" data-remote="false" data-target="#myModal" data-toggle="modal" >{_'Add element'}</a>
-	
-	<br /><br />
-	
-	{control elementGrid}
-	
-	{control settingsForm}
+	<div class="panel-group" id="accordion">
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+			<h4 class="panel-title">
+			  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+				{_'Form settings'}
+			  </a>
+			</h4>
+		  </div>
+		  <div id="collapseOne" class="panel-collapse collapse">
+			<div class="panel-body">
+			  <a class="btn btn-primary ajax" n:href="updateElement idPage => $idPage" data-remote="false" data-target="#myModal" data-toggle="modal" >{_'Add element'}</a>
+
+				<br /><br />
+
+				{control elementGrid}
+			</div>
+		  </div>
+		</div>
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+			<h4 class="panel-title">
+			  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+				{_'Settings'}
+			  </a>
+			</h4>
+		  </div>
+		  <div id="collapseTwo" class="panel-collapse collapse">
+			<div class="panel-body">
+				{control settingsForm}
+			</div>
+		  </div>
+		</div>
+	  </div>
 	
 {/block}
