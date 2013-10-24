@@ -1,0 +1,16 @@
+{block content}
+	
+	{include ../tabs.latte active => 'form'}
+
+	<h1>{$actualPage->getTitle()}</h1>
+
+	{$entry->getDate()->format('d.m.Y H:i:s')}
+	
+	{foreach $entry->getData() as $key => $value}
+		<div>
+			<strong>{$key}</strong>
+			<span>{$value}</span>
+		</div>
+	{/foreach}
+	
+{/block}

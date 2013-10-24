@@ -4,6 +4,12 @@
 
 	<h1>{$actualPage->getTitle()} - {_'Settings'}</h1>
 	
+	<a class="btn btn-primary ajax" n:href="updateElement idPage => $idPage" data-remote="false" data-target="#myModal" data-toggle="modal" >{_'Add element'}</a>
+	
+	<br /><br />
+	
+	{control elementGrid}
+	
 	{control settingsForm}
 	
 {/block}

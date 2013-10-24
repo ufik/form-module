@@ -1,5 +1,5 @@
 <ul class="nav nav-tabs" id="myTab">
-  <li {if $active == "page"}class="active"{/if}><a class="ajax" n:href="Guestbook:default idPage => $idPage">{_'Guestbook'}</a></li>
+  <li {if $active == "form"}class="active"{/if}><a class="ajax" n:href="Form:default idPage => $idPage">{_'Form'}</a></li>
   <li {if $active == "settings"}class="active"{/if}><a class="ajax" n:href="Settings:default idPage => $idPage">{_'Settings'}</a></li>
   {include ../../../webcms2/AdminModule/templates/system/boxes.latte id => $idPage}
 </ul>
