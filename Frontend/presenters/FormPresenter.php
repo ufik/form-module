@@ -54,7 +54,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			}
 		}
 		
-		$form->addSubmit('send', 'Send');
+		$form->addSubmit('send', 'Send')->setAttribute('class', 'btn btn-primary btn-lg');
 		$form->onSuccess[] = callback($this, 'formSubmitted');
 		
 		return $form;
