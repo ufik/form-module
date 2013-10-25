@@ -48,6 +48,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			}
 			
 			$form[$element->getName()]->setAttribute('class', 'form-control');
+			$form[$element->getName()]->setAttribute('placeholder', $element->getDescription());
 			
 			if($element->getRequired()){
 				$form[$element->getName()]->setRequired($element->getDescription());
