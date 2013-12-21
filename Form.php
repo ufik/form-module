@@ -30,7 +30,7 @@ class Form extends \WebCMS\Module {
 	);
 	
 	public function __construct(){
-		//$this->addBox('Form box', 'Form', 'formBox');
+		$this->addBox('Form box', 'Form', 'formBox');
 	}
 	
 }

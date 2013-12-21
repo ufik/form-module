@@ -2,6 +2,9 @@
 
 namespace FrontendModule\FormModule;
 
+use Nette\Application\UI;
+use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
+
 /**
  * Description of FormPresenter
  *
@@ -33,8 +36,31 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		));
 	}
 	
-	public function createComponentForm(){
-		$form = $this->createForm('form-submit');
+	public function createComponentForm($name, $context = null, $fromPage = null){
+		
+		if($context != null){
+			$this->elements = $context->em->getRepository('WebCMS\FormModule\Doctrine\Element')->findBy(array(
+				'page' => $fromPage
+			));
+			
+			$form = new UI\Form();
+		
+			$form->getElementPrototype()->action = $context->link('default', array(
+				'path' => $fromPage->getPath(),
+				'abbr' => $context->abbr,
+				'do' => 'form-submit'
+			));
+
+			$form->setTranslator($context->translator);
+			$form->setRenderer(new BootstrapRenderer);
+			
+			$form->getElementPrototype()->class = 'form-horizontal contact-agent-form';
+			
+			$form->addHidden('redirect')->setDefaultValue(true);
+		}else{
+			$form = $this->createForm('form-submit', 'default', $context);
+			$form->addHidden('redirect')->setDefaultValue(false);
+		}
 		
 		foreach($this->elements as $element){
 			if($element->getType() === 'text'){
@@ -66,6 +92,9 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		
 		$data = array();
 		
+		$redirect = $values->redirect;
+		unset($values->redirect);
+		
 		foreach($values as $key => $val){
 			$element = $this->elementRepository->findOneByName($key);
 			
@@ -90,17 +119,27 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		$mail->addTo($infoMail);
 		
 		if($this->getHttpRequest()->url->host !== 'localhost') $mail->setFrom('no-reply@' . $this->getHttpRequest()->url->host);
-		else $mail->setFrom('no-reply@test.cz');
+		else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
 			
 		$mail->setSubject('New message from ' . $this->getHttpRequest()->url->baseUrl);
 		$mail->setHtmlBody($mailBody);
 		$mail->send();
 		
 		$this->flashMessageTranslated('Data has been sent.', 'success');
-		$this->redirect('default', array(
-			'path' => $this->actualPage->getPath(),
-			'abbr' => $this->abbr
-		));
+		
+		if(!$redirect){
+			$this->redirect('default', array(
+				'path' => $this->actualPage->getPath(),
+				'abbr' => $this->abbr
+			));
+		}else{
+			$httpRequest = $this->getContext()->getService('httpRequest');
+			
+			$url = $httpRequest->getReferer();
+			$url->appendQuery(array(self::FLASH_KEY => $this->getParam(self::FLASH_KEY)));
+			
+			$this->redirectUrl($url->absoluteUrl);
+		}
 	}
 	
 	public function renderDefault($id){
@@ -109,4 +148,12 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		$this->template->id = $id;
 	}
 
+	public function formBox($context, $fromPage){
+		
+		$template = $context->createTemplate();
+		$template->form = $this->createComponentForm('form',$context, $fromPage);
+		$template->setFile('../app/templates/form-module/Form/boxes/form.latte');
+	
+		return $template;
+	}
 }
