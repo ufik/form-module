@@ -100,7 +100,7 @@ class SettingsPresenter extends BasePresenter {
 		
 		$this->em->flush();
 		
-		$this->flashMessage($this->translation['Element has been saved.'], 'success');
+		$this->flashMessage('Element has been saved.', 'success');
 		$this->redirect('default', array(
 			'idPage' => $this->actualPage->getId()
 		));

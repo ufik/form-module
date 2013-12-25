@@ -68,7 +68,7 @@ class FormPresenter extends BasePresenter {
 		$this->em->remove($this->post);
 		$this->em->flush();
 		
-		$this->flashMessage($this->translation['Entry has been removed.'], 'success');
+		$this->flashMessage('Entry has been removed.', 'success');
 		$this->redirect('default', array(
 			'idPage' => $this->actualPage->getId()
 		));

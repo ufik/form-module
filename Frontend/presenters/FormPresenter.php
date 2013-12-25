@@ -125,7 +125,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		$mail->setHtmlBody($mailBody);
 		$mail->send();
 		
-		$this->flashMessageTranslated('Data has been sent.', 'success');
+		$this->flashMessage('Data has been sent.', 'success');
 		
 		if(!$redirect){
 			$this->redirect('default', array(
