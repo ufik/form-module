@@ -95,10 +95,19 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		$redirect = $values->redirect;
 		unset($values->redirect);
 		
+		$emailContent = '';
 		foreach($values as $key => $val){
 			$element = $this->elementRepository->findOneByName($key);
 			
-			$data[$element->getLabel()] = $val;
+			if($element->getType() === 'checkbox'){
+				$value = $val ? $this->translation['Yes'] : $this->translation['No'];
+			}else{
+				$value = $val;
+			}
+			
+			$data[$element->getLabel()] = $value;
+			
+			$emailContent .= $element->getLabel() . ': ' . $value . '<br />';
 		}
 		
 		$entry = new \WebCMS\FormModule\Doctrine\Entry;
@@ -114,6 +123,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		$parsed = explode('@', $infoMail);
 		
 		$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
+		$mailBody = \WebCMS\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 		
 		$mail = new \Nette\Mail\Message;
 		$mail->addTo($infoMail);
