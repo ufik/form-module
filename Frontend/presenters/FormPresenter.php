@@ -66,14 +66,14 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			if($element->getType() === 'text'){
 				$form->addText($element->getName(), $element->getLabel());
 			}elseif($element->getType() === 'date'){
-				$form->addText($element->getName(), $element->getLabel())->setAttribute('class', 'datepicker');
+				$form->addText($element->getName(), $element->getLabel())->getControlPrototype()->addClass('datepicker');
 			}elseif($element->getType() === 'textarea'){
 				$form->addTextArea($element->getName(), $element->getLabel());
 			}elseif($element->getType() === 'checkbox'){
 				$form->addCheckbox($element->getName(), $element->getLabel());
 			}
 			
-			$form[$element->getName()]->setAttribute('class', 'form-control');
+			$form[$element->getName()]->getControlPrototype()->addClass('form-control');
 			$form[$element->getName()]->setAttribute('placeholder', $element->getDescription());
 			
 			if($element->getRequired()){
