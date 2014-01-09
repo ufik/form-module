@@ -133,7 +133,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		if($this->getHttpRequest()->url->host !== 'localhost') $mail->setFrom('no-reply@' . $this->getHttpRequest()->url->host);
 		else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
 			
-		$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue(););
+		$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
 		$mail->setHtmlBody($mailBody);
 		$mail->send();
 		
