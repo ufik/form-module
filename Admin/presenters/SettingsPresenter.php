@@ -26,6 +26,7 @@ class SettingsPresenter extends BasePresenter {
 		
 		$settings = array();
 		$settings[] = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea', array());
+		$settings[] = $this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
 		
 		return $this->createSettingsForm($settings);
 	}
@@ -63,6 +64,7 @@ class SettingsPresenter extends BasePresenter {
 		
 		$types = array(
 			'text' => 'Text input',
+			'email' => 'Email',
 			'textarea' => 'Long text',
 			'date' => 'Date input',
 			'checkbox' => 'Checkbox'
