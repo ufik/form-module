@@ -72,7 +72,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			}elseif($element->getType() === 'checkbox'){
 				$form->addCheckbox($element->getName(), $element->getLabel());
 			}elseif($element->getType() === 'email'){
-				$form->addText($element->getName(), $element->getLabel())->addRule(Form::EMAIL);
+				$form->addText($element->getName(), $element->getLabel())->addRule(UI\Form::EMAIL);
 			}
 			
 			$form[$element->getName()]->getControlPrototype()->addClass('form-control');
