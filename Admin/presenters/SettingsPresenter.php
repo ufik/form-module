@@ -25,8 +25,8 @@ class SettingsPresenter extends BasePresenter {
 	public function createComponentSettingsForm(){
 		
 		$settings = array();
+		$settings[] = $this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text');
 		$settings[] = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea', array());
-		$settings[] = $this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
 		
 		return $this->createSettingsForm($settings);
 	}
