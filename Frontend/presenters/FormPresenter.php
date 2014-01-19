@@ -156,6 +156,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 	
 	public function renderDefault($id){
 		
+		$this->template->form = $this->createComponentForm('form', $this, $this->actualPage);
 		$this->template->elements = $this->elements;
 		$this->template->id = $id;
 	}
