@@ -1,1 +1,10 @@
-{control form}
+{form $form}
+    {foreach $form->getComponents() as $element}
+        <div class="field">
+            <div class="label_fild">
+                {label $element /}
+            </div>
+            {input $element}
+        </div>
+    {/foreach}
+{/form}
