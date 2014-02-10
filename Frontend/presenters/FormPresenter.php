@@ -92,66 +92,72 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 	public function formSubmitted($form){
 		$values = $form->getValues();
 		
-		$data = array();
+		if (\WebCMS\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
 		
-		$redirect = $values->redirect;
-		unset($values->redirect);
-		
-		$emailContent = '';
-		foreach($values as $key => $val){
-			$element = $this->elementRepository->findOneByName($key);
-			
-			if($element->getType() === 'checkbox'){
-				$value = $val ? $this->translation['Yes'] : $this->translation['No'];
-			}else{
-				$value = $val;
+			$data = array();
+
+			$redirect = $values->redirect;
+			unset($values->redirect);
+
+			$emailContent = '';
+			foreach($values as $key => $val){
+				$element = $this->elementRepository->findOneByName($key);
+
+				if($element->getType() === 'checkbox'){
+					$value = $val ? $this->translation['Yes'] : $this->translation['No'];
+				}else{
+					$value = $val;
+				}
+
+				$data[$element->getLabel()] = $value;
+
+				$emailContent .= $element->getLabel() . ': ' . $value . '<br />';
 			}
-			
-			$data[$element->getLabel()] = $value;
-			
-			$emailContent .= $element->getLabel() . ': ' . $value . '<br />';
-		}
+
+			$entry = new \WebCMS\FormModule\Doctrine\Entry;
+			$entry->setDate(new \DateTime);
+			$entry->setPage($this->actualPage);
+			$entry->setData($data);
+
+			$this->em->persist($entry);
+			$this->em->flush();
+
+			// info email
+			$infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
+			$parsed = explode('@', $infoMail);
+
+			$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
+			$mailBody = \WebCMS\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
+
+			$mail = new \Nette\Mail\Message;
+			$mail->addTo($infoMail);
+
+			if($this->getHttpRequest()->url->host !== 'localhost') $mail->setFrom('no-reply@' . $this->getHttpRequest()->url->host);
+			else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
+
+			$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
+			$mail->setHtmlBody($mailBody);
+			$mail->send();
+
+			$this->flashMessage('Data has been sent.', 'success');
+
+			if(!$redirect){
+				$this->redirect('default', array(
+					'path' => $this->actualPage->getPath(),
+					'abbr' => $this->abbr
+				));
+			}else{
+				$httpRequest = $this->getContext()->getService('httpRequest');
+
+				$url = $httpRequest->getReferer();
+				$url->appendQuery(array(self::FLASH_KEY => $this->getParam(self::FLASH_KEY)));
+
+				$this->redirectUrl($url->absoluteUrl);
+			}
 		
-		$entry = new \WebCMS\FormModule\Doctrine\Entry;
-		$entry->setDate(new \DateTime);
-		$entry->setPage($this->actualPage);
-		$entry->setData($data);
-		
-		$this->em->persist($entry);
-		$this->em->flush();
-		
-		// info email
-		$infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
-		$parsed = explode('@', $infoMail);
-		
-		$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
-		$mailBody = \WebCMS\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
-		
-		$mail = new \Nette\Mail\Message;
-		$mail->addTo($infoMail);
-		
-		if($this->getHttpRequest()->url->host !== 'localhost') $mail->setFrom('no-reply@' . $this->getHttpRequest()->url->host);
-		else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
-			
-		$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
-		$mail->setHtmlBody($mailBody);
-		$mail->send();
-		
-		$this->flashMessage('Data has been sent.', 'success');
-		
-		if(!$redirect){
-			$this->redirect('default', array(
-				'path' => $this->actualPage->getPath(),
-				'abbr' => $this->abbr
-			));
-		}else{
-			$httpRequest = $this->getContext()->getService('httpRequest');
-			
-			$url = $httpRequest->getReferer();
-			$url->appendQuery(array(self::FLASH_KEY => $this->getParam(self::FLASH_KEY)));
-			
-			$this->redirectUrl($url->absoluteUrl);
-		}
+		} else {
+			$this->flashMessage('Wrong protection code.', 'danger');
+	    }
 	}
 	
 	public function renderDefault($id){
