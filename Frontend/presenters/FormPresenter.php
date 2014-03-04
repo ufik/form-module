@@ -91,9 +91,9 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 	
 	public function formSubmitted($form){
 		$values = $form->getValues();
-		
-		if (\WebCMS\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
-		
+
+		if (\WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
+			
 			$data = array();
 
 			$redirect = $values->redirect;
@@ -127,7 +127,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			$parsed = explode('@', $infoMail);
 
 			$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
-			$mailBody = \WebCMS\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
+			$mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 
 			$mail = new \Nette\Mail\Message;
 			$mail->addTo($infoMail);
@@ -156,6 +156,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			}
 		
 		} else {
+			
 			$this->flashMessage('Wrong protection code.', 'danger');
 	    }
 	}
