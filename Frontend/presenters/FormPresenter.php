@@ -157,7 +157,14 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		
 		} else {
 			
-			$this->flashMessage('Wrong protection code.', 'danger');
+			$this->flashMessage('Wrong protection code.', 'danger');	
+			$httpRequest = $this->getContext()->getService('httpRequest');
+
+			$url = $httpRequest->getReferer();
+			$url->appendQuery(array(self::FLASH_KEY => $this->getParam(self::FLASH_KEY)));
+
+			$this->redirectUrl($url->absoluteUrl);
+			
 	    }
 	}
 	
