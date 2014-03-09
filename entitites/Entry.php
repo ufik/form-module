@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as gedmo;
  * @orm\Entity
  * @author Tomáš Voslař <tomas.voslar at webcook.cz>
  */
-class Entry extends \AdminModule\Doctrine\Entity {
+class Entry extends \WebCMS\Entity\Entity {
 	
 	/**
 	 * @gedmo\Timestampable(on="create")
@@ -24,7 +24,7 @@ class Entry extends \AdminModule\Doctrine\Entity {
 	private $data;
 	
 	/**
-	 * @orm\ManyToOne(targetEntity="AdminModule\Page")
+	 * @orm\ManyToOne(targetEntity="WebCMS\Entity\Page")
 	 * @orm\JoinColumn(name="page_id", referencedColumnName="id", onDelete="CASCADE")
 	 */
 	private $page;

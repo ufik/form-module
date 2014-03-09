@@ -14,14 +14,14 @@
         }
     ],
     "require": {
-		"webcms2/webcms2": "<0.4"
+		"webcms2/webcms2": "~0.4"
     },
     "autoload": {
         "classmap": ["/"]
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.1.x-dev"
+            "dev-master": "0.2.x-dev"
         }
     }
 }
