@@ -124,6 +124,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 
 			// info email
 			$infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
+			$infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
 			$parsed = explode('@', $infoMail);
 
 			$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
