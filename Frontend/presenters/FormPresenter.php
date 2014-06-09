@@ -92,7 +92,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 	public function formSubmitted($form){
 		$values = $form->getValues();
 
-		if (\WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
+		if (!array_key_exists('realHash', $_POST) || \WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
 			
 			$data = array();
 
