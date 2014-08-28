@@ -127,10 +127,8 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			$infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
 			$parsed = explode('@', $infoMail);
 
-			/*$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
-			$mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));*/
 			$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
-			if(empty($mailBody)){$mailBody = $emailContent;}		
+			$mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 
 			$mail = new \Nette\Mail\Message;
 			$mail->addTo($infoMail);
