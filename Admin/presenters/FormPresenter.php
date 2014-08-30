@@ -7,31 +7,34 @@ namespace AdminModule\FormModule;
  *
  * @author Tomáš Voslař <tomas.voslar at webcook.cz>
  */
-class FormPresenter extends BasePresenter {
-	
+class FormPresenter extends BasePresenter
+{	
 	private $entry;
 	
-	protected function startup() {
+	protected function startup()
+	{
 		parent::startup();
 	}
 
-	protected function beforeRender() {
+	protected function beforeRender()
+	{
 		parent::beforeRender();
-		
 	}
 	
-	public function actionDefault($idPage){
+	public function actionDefault($idPage)
+	{
 	}
 	
-	public function renderDefault($idPage){
+	public function renderDefault($idPage)
+	{
 		$this->reloadContent();
 		
 		$this->template->idPage = $idPage;
 	}
 			
 	
-	protected function createComponentEntryGrid($name){
-				
+	protected function createComponentEntryGrid($name)
+	{			
 		$grid = $this->createGrid($this, $name, 'WebCMS\FormModule\Entity\Entry', array(
 			array('by' => 'date', 'dir' => 'DESC')
 			),
@@ -50,22 +53,24 @@ class FormPresenter extends BasePresenter {
 		return $grid;
 	}
 	
-	public function actionViewEntry($id, $idPage){
+	public function actionViewEntry($id, $idPage)
+	{
 		$this->reloadContent();
 		
 		$this->entry = $this->repository->find($id);
 	}
 	
-	public function renderViewEntry($idPage){
-		
+	public function renderViewEntry($idPage)
+	{	
 		$this->template->entry = $this->entry;
 		$this->template->idPage = $idPage;
 	}
 	
-	public function actionDeleteEntry($id, $idPage){
-		$this->post = $this->repository->find($id);
+	public function actionDeleteEntry($id, $idPage)
+	{
+		$this->entry = $this->repository->find($id);
 		
-		$this->em->remove($this->post);
+		$this->em->remove($this->entry);
 		$this->em->flush();
 		
 		$this->flashMessage('Entry has been removed.', 'success');
