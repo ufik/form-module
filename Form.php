@@ -16,12 +16,22 @@ class Form extends \WebCMS\Module {
 	protected $presenters = array(
 		array(
 			'name' => 'Form',
-			'frontend' => TRUE,
-			'parameters' => FALSE
+			'frontend' => true,
+			'parameters' => false
+			),
+		array(
+			'name' => 'Contact',
+			'frontend' => false,
+			'parameters' => false
+			),
+		array(
+			'name' => 'Place',
+			'frontend' => false,
+			'parameters' => false
 			),
 		array(
 			'name' => 'Settings',
-			'frontend' => FALSE
+			'frontend' => false
 			)
 	);
 	
@@ -31,6 +41,7 @@ class Form extends \WebCMS\Module {
 	
 	public function __construct(){
 		$this->addBox('Form box', 'Form', 'formBox');
+		$this->addBox('Form contacts box', 'Form', 'formContactsBox');
 	}
 	
 }

@@ -13,11 +13,17 @@ class BasePresenter extends \AdminModule\BasePresenter {
 	
 	protected $elementRepository;
 	
+	protected $contactRepository;
+
+	protected $placeRepository;
+
 	protected function startup() {
 		parent::startup();
 		
-		$this->repository = $this->em->getRepository('WebCMS\FormModule\Doctrine\Entry');
-		$this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Doctrine\Element');
+		$this->repository = $this->em->getRepository('WebCMS\FormModule\Entity\Entry');
+		$this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
+		$this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
+		$this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
 	}
 
 	protected function beforeRender() {

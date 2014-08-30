@@ -1,6 +1,6 @@
 <?php
 
-namespace WebCMS\FormModule\Doctrine;
+namespace WebCMS\FormModule\Entity;
 
 use Doctrine\ORM\Mapping as orm;
 use Gedmo\Mapping\Annotation as gedmo;

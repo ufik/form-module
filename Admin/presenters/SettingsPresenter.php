@@ -33,7 +33,7 @@
 
 	protected function createComponentElementGrid($name) {
 
-	    $grid = $this->createGrid($this, $name, 'WebCMS\FormModule\Doctrine\Element', array(), array(
+	    $grid = $this->createGrid($this, $name, 'WebCMS\FormModule\Entity\Element', array(), array(
 		'page = ' . $this->actualPage->getId()
 		)
 	    );
@@ -113,7 +113,7 @@
 	    if ($id)
 		$this->element = $this->elementRepository->find($id);
 	    else
-		$this->element = new \WebCMS\FormModule\Doctrine\Element;
+		$this->element = new \WebCMS\FormModule\Entity\Element;
 	}
 
 	public function renderUpdateElement($idPage) {

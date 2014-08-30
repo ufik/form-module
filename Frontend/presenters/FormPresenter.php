@@ -10,36 +10,45 @@ use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
  *
  * @author Tomáš Voslař <tomas.voslar at webcook.cz>
  */
-class FormPresenter extends \FrontendModule\BasePresenter{
-	
+class FormPresenter extends \FrontendModule\BasePresenter
+{	
 	private $repository;
 	
 	private $elementRepository;
+
+	private $contactRepository;
+
+	private $placeRepository;
 	
 	private $elements;
 	
-	protected function startup() {
+	protected function startup()
+	{
 		parent::startup();
 
-		$this->repository = $this->em->getRepository('WebCMS\FormModule\Doctrine\Entry');
-		$this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Doctrine\Element');
+		$this->repository = $this->em->getRepository('WebCMS\FormModule\Entity\Entry');
+		$this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
+		$this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
+		$this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
 	}
 
-	protected function beforeRender() {
+	protected function beforeRender()
+	{
 		parent::beforeRender();
 		
 	}
 	
-	public function actionDefault($id){
+	public function actionDefault($id)
+	{
 		$this->elements = $this->elementRepository->findBy(array(
 			'page' => $this->actualPage
 		));
 	}
 	
-	public function createComponentForm($name, $context = null, $fromPage = null){
-		
+	public function createComponentForm($name, $context = null, $fromPage = null)
+	{
 		if($context != null){
-			$this->elements = $context->em->getRepository('WebCMS\FormModule\Doctrine\Element')->findBy(array(
+			$this->elements = $context->em->getRepository('WebCMS\FormModule\Entity\Element')->findBy(array(
 				'page' => $fromPage
 			));
 			
@@ -62,6 +71,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			$form->addHidden('redirect')->setDefaultValue(false);
 		}
 		
+		$form->addHidden('contactId');
 		foreach($this->elements as $element){
 			if($element->getType() === 'text'){
 				$form->addText($element->getName(), $element->getLabel());
@@ -89,7 +99,8 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 		return $form;
 	}
 	
-	public function formSubmitted($form){
+	public function formSubmitted($form)
+	{
 		$values = $form->getValues();
 
 		if (!array_key_exists('realHash', $_POST) || \WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
@@ -97,7 +108,9 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			$data = array();
 
 			$redirect = $values->redirect;
+			$contactId = $values->contactId;
 			unset($values->redirect);
+			unset($values->contactId);
 
 			$emailContent = '';
 			foreach($values as $key => $val){
@@ -114,7 +127,7 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 				$emailContent .= $element->getLabel() . ': ' . $value . '<br />';
 			}
 
-			$entry = new \WebCMS\FormModule\Doctrine\Entry;
+			$entry = new \WebCMS\FormModule\Entity\Entry;
 			$entry->setDate(new \DateTime);
 			$entry->setPage($this->actualPage);
 			$entry->setData($data);
@@ -123,10 +136,15 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 			$this->em->flush();
 
 			// info email
-			$infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
-			$infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
-			$parsed = explode('@', $infoMail);
-
+			if (is_numeric($contactId)) {
+				$contact = $this->contactRepository->find($contactId);
+				$infoMail = $contact->getEmail();
+			} else {
+				$infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
+				$infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
+				$parsed = explode('@', $infoMail);	
+			}
+			
 			$mailBody = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea')->getValue();
 			$mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 
@@ -138,10 +156,14 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 
 			$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
 			$mail->setHtmlBody($mailBody);
-			$mail->send();
-
-			$this->flashMessage('Data has been sent.', 'success');
-
+			
+			try {
+				$mail->send();	
+				$this->flashMessage('Data has been sent.', 'success');
+			} catch (\Exception $e) {
+				$this->flashMessage('Cannot send email.', 'danger');					
+			}
+			
 			if(!$redirect){
 				$this->redirect('default', array(
 					'path' => $this->actualPage->getPath(),
@@ -169,18 +191,32 @@ class FormPresenter extends \FrontendModule\BasePresenter{
 	    }
 	}
 	
-	public function renderDefault($id){
-		
+	public function renderDefault($id)
+	{
 		$this->template->form = $this->createComponentForm('form', $this, $this->actualPage);
 		$this->template->elements = $this->elements;
 		$this->template->id = $id;
 	}
 
-	public function formBox($context, $fromPage){
-		
+	public function formBox($context, $fromPage)
+	{	
 		$template = $context->createTemplate();
 		$template->form = $this->createComponentForm('form',$context, $fromPage);
 		$template->setFile('../app/templates/form-module/Form/boxes/form.latte');
+	
+		return $template;
+	}
+
+	public function formContactsBox($context, $fromPage)
+	{
+		$template = $context->createTemplate();
+		$template->places = $context->em->getRepository('\WebCMS\FormModule\Entity\Place')->findBy(array(), array(
+			'name' => 'ASC'
+		));
+		$template->contacts = $context->em->getRepository('\WebCMS\FormModule\Entity\Contact')->findAll(array(), array(
+			'name' => 'ASC'
+		));
+		$template->setFile('../app/templates/form-module/Form/boxes/contacts.latte');
 	
 		return $template;
 	}

@@ -1,0 +1,12 @@
+{block content}
+	
+	{include ../tabs.latte active => 'place'}
+
+	<h1>{$actualPage->getTitle()} - {_'Places'}</h1>
+	
+	<a class="btn btn-primary ajax" n:href="editPlace idPage => $idPage">{_'Add place'}</a>
+	<br /><br />
+
+	{control placeGrid}
+	
+{/block}

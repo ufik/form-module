@@ -32,7 +32,7 @@ class FormPresenter extends BasePresenter {
 	
 	protected function createComponentEntryGrid($name){
 				
-		$grid = $this->createGrid($this, $name, 'WebCMS\FormModule\Doctrine\Entry', array(
+		$grid = $this->createGrid($this, $name, 'WebCMS\FormModule\Entity\Entry', array(
 			array('by' => 'date', 'dir' => 'DESC')
 			),
 			array(
