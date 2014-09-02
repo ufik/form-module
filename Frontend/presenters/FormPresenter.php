@@ -150,8 +150,10 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
 			$mail = new \Nette\Mail\Message;
 			$mail->addTo($infoMail);
-
-			if($this->getHttpRequest()->url->host !== 'localhost') $mail->setFrom('no-reply@' . $this->getHttpRequest()->url->host);
+			
+			$domain = str_replace('www.', '', $this->getHttpRequest()->url->host);
+			
+			if($domain !== 'localhost') $mail->setFrom('no-reply@' . $domain);
 			else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
 
 			$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
