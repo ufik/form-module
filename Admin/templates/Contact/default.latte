@@ -1,12 +1,17 @@
 {block content}
 	
-	{include ../tabs.latte active => 'contact'}
-
-	<h1>{$actualPage->getTitle()} - {_'Contacts'}</h1>
-	
+	<div class="page-heading">	
+		<h1>{$actualPage->getTitle()} - {_'Contacts'}</h1>
+		{include ../tabs.latte active => 'contact'}
+	</div>
+	<br />
+	<div class="control-group">
 	<a class="btn btn-primary ajax" n:href="editContact idPage => $idPage">{_'Add contact'}</a>
-	<br /><br />
+	</div>
+	
 
+	<div class="control-group">
 	{control contactGrid}
+	</div>
 	
 {/block}

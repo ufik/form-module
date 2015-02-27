@@ -1,9 +1,12 @@
 {block content}
 	
-	{include ../tabs.latte active => 'form'}
-
-	<h1>{$actualPage->getTitle()}</h1>
+	<div class="page-heading">	
+		<h1>{$actualPage->getTitle()}</h1>
+		{include ../tabs.latte active => 'form'}
+	</div>
 	
+	<div class="control-group">
 	{control entryGrid}
+	</div>
 	
 {/block}
