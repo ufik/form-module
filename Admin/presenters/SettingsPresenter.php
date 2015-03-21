@@ -2,6 +2,8 @@
 
     namespace AdminModule\FormModule;
 
+    use Nette;
+
     /**
      * Description of SettingsPresenter
      * @author Tomáš Voslař <tomas.voslar at webcook.cz>
@@ -15,7 +17,20 @@
 	}
 
 	protected function beforeRender() {
+	    
 	    parent::beforeRender();
+
+	    // validate FROM email address
+	    $infoFromEmail = $this->settings->get('Info email FROM address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+	    if (!Nette\Utils\Validators::isEmail($infoFromEmail)) {
+		$this->flashMessage('Please fill in valid FROM email address.', 'warning');
+            }
+	    // validate REPLYTO email address
+	    $infoReplyToEmail = $this->settings->get('Info email REPLYTO address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+	    if (!Nette\Utils\Validators::isEmail($infoReplyToEmail)) {
+		$this->flashMessage('Please fill in valid REPLY-TO email address.', 'warning');
+            }
+	    
 	}
 
 	public function actionDefault($idPage) {
@@ -25,6 +40,12 @@
 	public function createComponentSettingsForm() {
 
 	    $settings = array();
+	    $settings[] = $this->settings->get('Info email FROM address', 'formModule' . $this->actualPage->getId(), 'text');
+	    $settings[] = $this->settings->get('Info email FROM name', 'formModule' . $this->actualPage->getId(), 'text');
+	    $settings[] = $this->settings->get('Info email REPLYTO address', 'formModule' . $this->actualPage->getId(), 'text');
+	    $settings[] = $this->settings->get('Info email REPLYTO name', 'formModule' . $this->actualPage->getId(), 'text');
+	    $settings[] = $this->settings->get('Info email CC recipients', 'formModule' . $this->actualPage->getId(), 'text');
+	    $settings[] = $this->settings->get('Info email BCC recipients', 'formModule' . $this->actualPage->getId(), 'text');
 	    $settings[] = $this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text');
 	    $settings[] = $this->settings->get('Info email', 'formModule' . $this->actualPage->getId(), 'textarea', array());
 
@@ -45,7 +66,7 @@
 		return $item->getRequired() ? 'Yes' : 'No';
 	    });
 
-	    $grid->addActionHref("updateElement", 'Response', 'updateElement', array('idPage' => $this->actualPage->getId()))->getElementPrototype()->addAttributes(array('class' => array('btn', 'btn-primary', 'ajax'), 'data-toggle' => 'modal', 'data-target' => '#myModal', 'data-remote' => 'false'));
+	    $grid->addActionHref("updateElement", 'Edit', 'updateElement', array('idPage' => $this->actualPage->getId()))->getElementPrototype()->addAttributes(array('class' => array('btn', 'btn-primary', 'ajax'), 'data-toggle' => 'modal', 'data-target' => '#myModal', 'data-remote' => 'false'));
 	    $grid->addActionHref("deleteElement", 'Delete', 'deleteElement', array('idPage' => $this->actualPage->getId()))->getElementPrototype()->addAttributes(array('class' => array('btn', 'btn-danger'), 'data-confirm' => 'Are you sure you want to delete this item?'));
 
 	    return $grid;
