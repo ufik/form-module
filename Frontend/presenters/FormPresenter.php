@@ -151,11 +151,40 @@ class FormPresenter extends \FrontendModule\BasePresenter
 			$mail = new \Nette\Mail\Message;
 			$mail->addTo($infoMail);
 			
-			$domain = str_replace('www.', '', $this->getHttpRequest()->url->host);
+			$mailFrom = $this->settings->get('Info email FROM address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+			$mailFromName = $this->settings->get('Info email FROM name', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
 			
-			if($domain !== 'localhost') $mail->setFrom('no-reply@' . $domain);
-			else $mail->setFrom('no-reply@test.cz'); // TODO move to settings
+			if(!empty($mailFrom)){
+				$mail->setFrom($mailFrom, $mailFromName);
+			}else{
+				$domain = str_replace('www.', '', $this->getHttpRequest()->url->host); // TODO: this doesn't work if the host is IP address = no default fallback
+				if($domain !== 'localhost') $mail->setFrom('no-reply@' . $domain);
+				else $mail->setFrom('no-reply@test.cz');
+			}
 
+			$mailReplyTo = $this->settings->get('Info email REPLYTO address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+			$mailReplyToName = $this->settings->get('Info email REPLYTO name', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+
+			if(!empty($mailReplyTo)) $mail->addReplyTo($mailReplyTo , $mailReplyToName);
+
+			$mailCc = $this->settings->get('Info email CC recipients', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+			
+			if(!empty($mailCc)){
+				$cc = explode(';', $mailCc);
+				foreach($cc as $key => $value){
+					$mail->addCc($value);
+				}
+			}
+
+			$mailBcc = $this->settings->get('Info email BCC recipients', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+			
+			if(!empty($mailBcc)){
+				$bcc = explode(';', $mailBcc);
+				foreach($bcc as $key => $value){
+					$mail->addBcc($value);
+				}
+			}
+			
 			$mail->setSubject($this->settings->get('Info email subject', 'formModule' . $this->actualPage->getId(), 'text')->getValue());
 			$mail->setHtmlBody($mailBody);
 			
