@@ -22,14 +22,50 @@
 
 	    // validate FROM email address
 	    $infoFromEmail = $this->settings->get('Info email FROM address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
-	    if (!Nette\Utils\Validators::isEmail($infoFromEmail)) {
-		$this->flashMessage('Please fill in valid FROM email address.', 'warning');
-            }
+	    if(!empty($infoFromEmail)) {
+		if(!Nette\Utils\Validators::isEmail($infoFromEmail)) {
+		    $this->flashMessage('Please fill in valid FROM email address.', 'warning');
+		}
+	    }
 	    // validate REPLYTO email address
 	    $infoReplyToEmail = $this->settings->get('Info email REPLYTO address', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
-	    if (!Nette\Utils\Validators::isEmail($infoReplyToEmail)) {
-		$this->flashMessage('Please fill in valid REPLY-TO email address.', 'warning');
+	    if(!empty($infoReplyToEmail)) {
+		if(!Nette\Utils\Validators::isEmail($infoReplyToEmail)) {
+		    $this->flashMessage('Please fill in valid REPLY-TO email address.', 'warning');
+        	}
             }
+            // validate/sanitize CC addresses
+	    $infoCc = $this->settings->get('Info email CC recipients', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+	    if(!empty($infoCc)) {
+		$sanitizedCc = rtrim(rtrim($infoCc), ';');
+		if($infoCc !== $sanitizedCc) {
+		    $this->settings->get('Info email CC recipients', 'formModule' . $this->actualPage->getId(), 'text')->setValue($sanitizedCc);
+		    $this->em->flush();
+		    //$this->flashMessage('Inserted CC settings were sanitized.' , 'info');
+		}
+		$cc = explode(';', $sanitizedCc);
+		foreach($cc as $key => $value){
+		    if(!Nette\Utils\Validators::isEmail($value)) {
+			$this->flashMessage('Invalid CC email address (' . $value . ').', 'warning');
+		    }
+		}
+	    }
+            // validate/sanitize BCC addresses
+	    $infoBcc = $this->settings->get('Info email BCC recipients', 'formModule' . $this->actualPage->getId(), 'text')->getValue();
+	    if(!empty($infoBcc)) {
+		$sanitizedBcc = rtrim(rtrim($infoBcc), ';');
+		if($infoBcc !== $sanitizedBcc) {
+		    $this->settings->get('Info email BCC recipients', 'formModule' . $this->actualPage->getId(), 'text')->setValue($sanitizedBcc);
+		    $this->em->flush();
+		    //$this->flashMessage('Inserted BCC settings were sanitized.' , 'info');
+		}
+		$bcc = explode(';', $sanitizedBcc);
+		foreach($bcc as $key => $value){
+		    if(!Nette\Utils\Validators::isEmail($value)) {
+			$this->flashMessage('Invalid BCC email address (' . $value . ').', 'warning');
+		    }
+		}
+	    }
 	    
 	}
 
