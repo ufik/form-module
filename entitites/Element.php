@@ -72,6 +72,10 @@ class Element extends \WebCMS\Entity\Entity {
 		return $this->page;
 	}
 
+	public function getValue() {
+		return $this->value;
+	}
+
 	public function setName($name) {
 		$this->name = $name;
 	}
@@ -94,5 +98,9 @@ class Element extends \WebCMS\Entity\Entity {
 
 	public function setPage($page) {
 		$this->page = $page;
+	}
+
+	public function setValue($value) {
+		$this->value = $value;
 	}
 }

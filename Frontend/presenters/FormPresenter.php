@@ -3,6 +3,7 @@
 namespace FrontendModule\FormModule;
 
 use Nette\Application\UI;
+use Nette\Http\IRequest;
 use Kdyby\BootstrapFormRenderer\BootstrapRenderer;
 
 /**
@@ -21,7 +22,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
 	private $placeRepository;
 	
 	private $elements;
-	
+
 	protected function startup()
 	{
 		parent::startup();
@@ -35,7 +36,6 @@ class FormPresenter extends \FrontendModule\BasePresenter
 	protected function beforeRender()
 	{
 		parent::beforeRender();
-		
 	}
 	
 	public function actionDefault($id)
@@ -44,10 +44,53 @@ class FormPresenter extends \FrontendModule\BasePresenter
 			'page' => $this->actualPage
 		));
 	}
+
+	public function populateDynamicFormValues($value, $httpRequest)
+	{
+		if (is_object($httpRequest)) {
+			switch ($value) {
+				case '%d':
+					$value = str_replace('www.', '', $httpRequest->url->host);
+					break;
+				case '%u':
+					$value = $httpRequest->url->absoluteUrl;
+					break;
+				case '%q':
+					$value = NULL;
+					$params = $httpRequest->getQuery();
+					foreach ($params as $key => $val) {
+						$value .= $key . '=' . $val . "&";
+					}
+					$value = rtrim($value, '&');
+					break;
+				case '%a':
+					$value = $httpRequest->getHeader('user-agent');
+					
+					break;
+				case '%i':
+					$value = $httpRequest->getRemoteAddress();
+					break;
+				case '%r':
+					if (is_object($httpRequest->getReferer())) {
+						$value = $httpRequest->getReferer()->absoluteUrl;
+					} else {
+						$value = '';
+					}
+					break;
+				default:
+					if (substr_compare($value, '%qparam-', 1, 8)) {
+						$key = substr($value, 8);
+						$value = $httpRequest->getQuery($key);
+					}
+			}
+		}
+
+		return $value;
+	}
 	
 	public function createComponentForm($name, $context = null, $fromPage = null)
 	{
-		if($context != null){
+		if ($context != null) {
 			$this->elements = $context->em->getRepository('WebCMS\FormModule\Entity\Element')->findBy(array(
 				'page' => $fromPage
 			));
@@ -66,29 +109,33 @@ class FormPresenter extends \FrontendModule\BasePresenter
 			$form->getElementPrototype()->class = 'form-horizontal contact-agent-form';
 			
 			$form->addHidden('redirect')->setDefaultValue(true);
-		}else{
+			$httpRequest = $context->getHttpRequest();
+		} else {
 			$form = $this->createForm('form-submit', 'default', $context);
 			$form->addHidden('redirect')->setDefaultValue(false);
+			$httpRequest = NULL;
 		}
-		
+
 		$form->addHidden('contactId');
-		foreach($this->elements as $element){
-			if($element->getType() === 'text'){
+		foreach ($this->elements as $element){
+			if ($element->getType() === 'text') {
 				$form->addText($element->getName(), $element->getLabel());
-			}elseif($element->getType() === 'date'){
+			} elseif ($element->getType() === 'date') {
 				$form->addText($element->getName(), $element->getLabel())->getControlPrototype()->addClass('datepicker');
-			}elseif($element->getType() === 'textarea'){
+			} elseif ($element->getType() === 'textarea') {
 				$form->addTextArea($element->getName(), $element->getLabel());
-			}elseif($element->getType() === 'checkbox'){
+			} elseif ($element->getType() === 'checkbox') {
 				$form->addCheckbox($element->getName(), $element->getLabel());
-			}elseif($element->getType() === 'email'){
+			} elseif ($element->getType() === 'email') {
 				$form->addText($element->getName(), $element->getLabel())->addRule(UI\Form::EMAIL);
+			} elseif ($element->getType() === 'hidden') {
+				$form->addHidden($element->getName())->setValue($this->populateDynamicFormValues($element->getValue(), $httpRequest));
 			}
 			
 			$form[$element->getName()]->getControlPrototype()->addClass('form-control');
 			$form[$element->getName()]->setAttribute('placeholder', $element->getDescription());
 			
-			if($element->getRequired()){
+			if ($element->getRequired()) {
 				$form[$element->getName()]->setRequired($element->getDescription());
 			}
 		}
@@ -113,18 +160,18 @@ class FormPresenter extends \FrontendModule\BasePresenter
 			unset($values->contactId);
 
 			$emailContent = '';
-			foreach($values as $key => $val){
+			foreach ($values as $key => $val) {
 				$element = $this->elementRepository->findOneByName($key);
 
-				if($element->getType() === 'checkbox'){
+				if ($element->getType() === 'checkbox') {
 					$value = $val ? $this->translation['Yes'] : $this->translation['No'];
-				}else{
+				} else {
 					$value = $val;
 				}
 
 				$data[$element->getLabel()] = $value;
 
-				$emailContent .= $element->getLabel() . ': ' . $value . '<br />';
+				$emailContent .= $element->getLabel() . ' ' . $value . '<br />';
 			}
 
 			$entry = new \WebCMS\FormModule\Entity\Entry;
@@ -251,4 +298,5 @@ class FormPresenter extends \FrontendModule\BasePresenter
 	
 		return $template;
 	}
+
 }
