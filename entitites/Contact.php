@@ -7,7 +7,6 @@
 namespace WebCMS\FormModule\Entity;
 
 use Doctrine\ORM\Mapping as orm;
-use Gedmo\Mapping\Annotation as gedmo;
 
 /**
  * @orm\Entity
@@ -15,47 +14,47 @@ use Gedmo\Mapping\Annotation as gedmo;
  */
 class Contact extends \WebCMS\Entity\Entity
 {
-	/**
-	 * @orm\Column
-	 * @var [type]
-	 */
-	private $name;
-
-	/**
-	 * @orm\Column
-	 * @var [type]
-	 */
-	private $email;
+    /**
+     * @orm\Column
+     * @var [type]
+     */
+    private $name;
 
     /**
      * @orm\Column
-     * @var 
-     */    
+     * @var [type]
+     */
+    private $email;
+
+    /**
+     * @orm\Column
+     * @var
+     */
     private $street;
 
     /**
      * @orm\Column
-     * @var 
+     * @var
      */
     private $city;
 
     /**
      * @orm\Column
-     * @var 
+     * @var
      */
     private $postcode;
 
     /**
      * @orm\Column
-     * @var 
+     * @var
      */
     private $web;
 
-	/**
+    /**
      * @orm\ManyToOne(targetEntity="Place")
      * @orm\JoinColumn(referencedColumnName="id", onDelete="SET NULL", nullable=true)
      */
-	private $place;
+    private $place;
 
     /**
      * Gets the value of name.

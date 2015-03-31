@@ -7,37 +7,39 @@ namespace AdminModule\FormModule;
  *
  * @author Tomáš Voslař <tomas.voslar at webcook.cz>
  */
-class BasePresenter extends \AdminModule\BasePresenter {
-	
-	protected $repository;
-	
-	protected $elementRepository;
-	
-	protected $contactRepository;
+class BasePresenter extends \AdminModule\BasePresenter
+{
+    protected $repository;
 
-	protected $placeRepository;
+    protected $elementRepository;
 
-	protected function startup() {
-		parent::startup();
-		
-		$this->repository = $this->em->getRepository('WebCMS\FormModule\Entity\Entry');
-		$this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
-		$this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
-		$this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
-	}
+    protected $contactRepository;
 
-	protected function beforeRender() {
-		parent::beforeRender();
-		
-	}
-	
-	public function actionDefault($idPage){
+    protected $placeRepository;
 
-	}
-	
-	public function renderDefault($idPage){
-		$this->reloadContent();
-		
-		$this->template->idPage = $idPage;
-	}
+    protected function startup()
+    {
+        parent::startup();
+
+        $this->repository = $this->em->getRepository('WebCMS\FormModule\Entity\Entry');
+        $this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
+        $this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
+        $this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
+    }
+
+    protected function beforeRender()
+    {
+        parent::beforeRender();
+    }
+
+    public function actionDefault($idPage)
+    {
+    }
+
+    public function renderDefault($idPage)
+    {
+        $this->reloadContent();
+
+        $this->template->idPage = $idPage;
+    }
 }

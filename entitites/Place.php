@@ -7,7 +7,6 @@
 namespace WebCMS\FormModule\Entity;
 
 use Doctrine\ORM\Mapping as orm;
-use Gedmo\Mapping\Annotation as gedmo;
 
 /**
  * @orm\Entity
@@ -15,11 +14,11 @@ use Gedmo\Mapping\Annotation as gedmo;
  */
 class Place extends \WebCMS\Entity\Entity
 {
-	/**
-	 * @orm\Column
-	 * @var [type]
-	 */
-	private $name;
+    /**
+     * @orm\Column
+     * @var [type]
+     */
+    private $name;
 
     /**
      * Gets the value of name.
