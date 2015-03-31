@@ -2,4 +2,41 @@
 	
 	{control elementForm}
 
+	<div class="jq_hint_wrapper control-group hidden">
+		<p>{_'Dynamic options for value:'}</p>
+		<ul>
+			<li>%d - naked domain name (without www.)</li>
+			<li>%u - complete URL of the page where the form was submited from</li>
+			<li>%q - query string (parameters after ?)</li>
+			<li>%qparam-[parameter_name] - value of "parameter_name" if it exists in the query string</li>
+			<li>%a - user-agent</li>
+			<li>%i - remote IP</li>
+			<li>%r - referrer</li>
+		</ul>
+	</div>
+
+	<script type="text/javascript">
+
+		function toggleHiddenControls(value){
+			if (value == 'hidden') {
+				$('.jq_hint_wrapper').removeClass('hidden');
+				$('.jq_value_input').removeClass('hidden');
+			} else {
+				$('.jq_hint_wrapper').addClass('hidden');
+				$('.jq_value_input').addClass('hidden');
+			}				
+		}
+
+		$( document ).ready(function() {
+			var value = $('.jq_type_box').val();
+			toggleHiddenControls(value);
+		});
+
+		$(document).on('change', '.jq_type_box', function(){
+			var value = $(this).val();
+			toggleHiddenControls(value);
+		});
+
+	</script>
+
 {/block}
