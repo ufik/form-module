@@ -20,6 +20,8 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
     private $placeRepository;
 
+    private $attachmentRepository;
+
     private $elements;
 
     protected function startup()
@@ -30,6 +32,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
         $this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
         $this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
         $this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
+        $this->attachmentRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Attachment');
     }
 
     protected function beforeRender()
@@ -250,6 +253,14 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
             $mail->setSubject($this->settings->get('Info email subject', 'formModule'.$this->actualPage->getId(), 'text')->getValue());
             $mail->setHtmlBody($mailBody);
+
+            //attachments
+            $attachments = $this->attachmentRepository->findAll();
+            if ($attachments) {
+                foreach ($attachments as $attachment) {
+                    $mail->addAttachment($attachment->getName(), file_get_contents($attachment->getPath()));
+                }
+            }
 
             try {
                 $mail->send();

@@ -65,6 +65,16 @@ class AttachmentPresenter extends BasePresenter
 
         $this->attachment->setName($values->name);
 
+        if(array_key_exists('files', $_POST)){
+            $counter = 0;
+            foreach($_POST['files'] as $path){
+
+                $this->attachment->setPath($path);
+
+                $counter++;
+            }
+        }
+
         if (!$this->attachment->getId()) {
             $this->em->persist($this->attachment);
         }
