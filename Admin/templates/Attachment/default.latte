@@ -1,0 +1,14 @@
+{block content}
+	
+	<div class="page-heading">	
+		<h1>{$actualPage->getTitle()} - {_'Attachments'}</h1>
+		{include ../tabs.latte active => 'attachment'}
+	</div>
+	<br />
+	<div class="control-group">
+	<a class="btn btn-primary ajax" n:href="editAttachment idPage => $idPage">{_'Add attachment'}</a>
+	</div>
+	<div class="control-group">
+	{control attachmentGrid}
+	</div>
+{/block}

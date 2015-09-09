@@ -21,6 +21,11 @@ class Attachment extends \WebCMS\Entity\Entity
     private $name;
 
     /**
+     * @orm\Column(type="text")
+     */
+    private $path;
+
+    /**
      * Gets the value of name.
      *
      * @return [type]
@@ -41,6 +46,18 @@ class Attachment extends \WebCMS\Entity\Entity
     {
         $this->name = $name;
 
+        return $this;
+    }
+
+    public function getPath() 
+    {
+        return $this->path;
+    }
+
+    public function setPath($path) 
+    {
+        $this->path = $path;
+        
         return $this;
     }
 }

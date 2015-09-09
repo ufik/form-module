@@ -1,0 +1,48 @@
+{block content}
+	
+	<div class="page-heading">	
+		<h1>{$actualPage->getTitle()} - {_'Edit attachment'}</h1>
+		{include ../tabs.latte active => 'attachment'}
+	</div>
+	
+	<div class="control-group">
+	
+		{form attachmentForm}
+			
+	        <div class="control-group">
+        		{label name class => 'control-label' /}
+        		<div class="controls">
+        			{input name class => 'form-control'}
+        		</div>
+        	</div>
+
+        	<div class="control-group">
+        		<a n:href=":Admin:Filesystem:default dialog => true, multiple => false" data-container="#pictures" class="btn btn-open-smth ajax filesDialog" data-remote="false" data-target="#myModal" data-toggle="modal">{_'Load files'}</a>
+        	</div>
+
+        	{* <div class="well row" id="pictures">
+				{if is_object($attachments)}
+
+					{foreach $photogallery->getPhotos() as $photo}
+						<div class="image-wrap jq_fileBox">
+							<div class="img-thumbnail">
+								<img src="{$basePath}{$photo->getPath()|thumbnail:'system'}" />
+								<input type="hidden" name="files[]" value="{$photo->getPath()}" />
+								<input class="form-control" placeholder="Popisek fotky" type="text" name="fileNames[]" value="{$photo->getTitle()}" />
+								<span class="btn btn-default jq_fileDelete">&times</span>
+							</div>
+						</div>
+					{/foreach}
+
+				{/if}
+			</div> *}
+
+        	<div class="form-actions">
+            	{input send class => 'btn btn-success'}
+            </div>
+		   
+		{/form}
+
+	</div>
+	
+{/block}
