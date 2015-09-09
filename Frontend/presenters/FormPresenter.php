@@ -258,7 +258,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
             $attachments = $this->attachmentRepository->findAll();
             if ($attachments) {
                 foreach ($attachments as $attachment) {
-                    $mail->addAttachment($attachment->getName(), file_get_contents($attachment->getPath()));
+                    $mail->addAttachment($attachment->getName(), file_get_contents(WWW_DIR.$attachment->getPath()));
                 }
             }
 
