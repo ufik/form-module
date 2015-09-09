@@ -190,11 +190,24 @@ class FormPresenter extends \FrontendModule\BasePresenter
                 $parsed = explode('@', $infoMail);
             }
 
+            $sendToUser = $this->settings->get('Info send to user', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
+            $sendToAdmin = $this->settings->get('Info send to admin', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
+
             $mailBody = $this->settings->get('Info email', 'formModule'.$this->actualPage->getId(), 'textarea')->getValue();
             $mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 
             $mail = new \Nette\Mail\Message();
-            $mail->addTo($infoMail);
+            if ($sendToAdmin) {
+                $mail->addTo($infoMail);
+            }
+            if ($sendToUser) {
+               foreach ($data as $key => $value) {
+                    if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $mail->addTo($value);
+                        break;
+                    }
+                }
+            }
 
             $mailFrom = $this->settings->get('Info email FROM address', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
             $mailFromName = $this->settings->get('Info email FROM name', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
@@ -241,6 +254,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
             try {
                 $mail->send();
                 $this->flashMessage('Data has been sent.', 'success');
+                
             } catch (\Exception $e) {
                 $this->flashMessage('Cannot send email.', 'danger');
             }
@@ -258,6 +272,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
                 $this->redirectUrl($url->absoluteUrl);
             }
+
         } else {
             $this->flashMessage('Wrong protection code.', 'danger');
             $httpRequest = $this->getContext()->getService('httpRequest');

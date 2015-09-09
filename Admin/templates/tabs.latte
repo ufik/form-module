@@ -2,6 +2,7 @@
   <li {if $active == "form"}class="active"{/if}><a class="ajax" n:href="Form:default idPage => $idPage">{_'Form'}</a></li>
   <li {if $active == "contact"}class="active"{/if}><a class="ajax" n:href="Contact:default idPage => $idPage">{_'Contacts'}</a></li>
   <li {if $active == "place"}class="active"{/if}><a class="ajax" n:href="Place:default idPage => $idPage">{_'Places'}</a></li>
+  <li {if $active == "attachment"}class="active"{/if}><a class="ajax" n:href="Attachment:default idPage => $idPage">{_'Attachments'}</a></li>
   <li {if $active == "settings"}class="active"{/if}><a class="ajax settingsTab" n:href="Settings:default idPage => $idPage">{_'Settings'}</a></li>
   {include ../../../webcms2/AdminModule/templates/system/boxes.latte id => $idPage}
 </ul>

@@ -81,6 +81,8 @@ use Nette;
             $settings[] = $this->settings->get('Info email CC recipients', 'formModule'.$this->actualPage->getId(), 'text');
             $settings[] = $this->settings->get('Info email BCC recipients', 'formModule'.$this->actualPage->getId(), 'text');
             $settings[] = $this->settings->get('Info email subject', 'formModule'.$this->actualPage->getId(), 'text');
+            $settings[] = $this->settings->get('Info send to user', 'formModule'.$this->actualPage->getId(), 'checkbox');
+            $settings[] = $this->settings->get('Info send to admin', 'formModule'.$this->actualPage->getId(), 'checkbox');
             $settings[] = $this->settings->get('Info email', 'formModule'.$this->actualPage->getId(), 'textarea', array());
 
             return $this->createSettingsForm($settings);

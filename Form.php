@@ -30,6 +30,11 @@ class Form extends \WebCMS\Module
             'parameters' => false,
             ),
         array(
+            'name' => 'Attachment',
+            'frontend' => false,
+            'parameters' => false,
+            ),
+        array(
             'name' => 'Settings',
             'frontend' => false,
             ),

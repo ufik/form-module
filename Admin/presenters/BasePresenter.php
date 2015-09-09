@@ -17,6 +17,8 @@ class BasePresenter extends \AdminModule\BasePresenter
 
     protected $placeRepository;
 
+    protected $attachmentRepository;
+
     protected function startup()
     {
         parent::startup();
@@ -25,6 +27,7 @@ class BasePresenter extends \AdminModule\BasePresenter
         $this->elementRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Element');
         $this->contactRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Contact');
         $this->placeRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Place');
+        $this->attachmentRepository = $this->em->getRepository('WebCMS\FormModule\Entity\Attachment');
     }
 
     protected function beforeRender()
