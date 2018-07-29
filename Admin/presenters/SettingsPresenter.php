@@ -129,6 +129,7 @@ use Nette;
         'date' => 'Date input',
         'checkbox' => 'Checkbox',
         'hidden' => 'Hidden field',
+        'upload' => 'Upload',
         );
 
             $form->addText('label', 'Label')->setRequired();
