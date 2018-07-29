@@ -132,6 +132,8 @@ class FormPresenter extends \FrontendModule\BasePresenter
                 $form->addText($element->getName(), $element->getLabel())->addRule(UI\Form::EMAIL);
             } elseif ($element->getType() === 'hidden') {
                 $form->addHidden($element->getName())->setValue($this->populateDynamicFormValues($element->getValue(), $httpRequest));
+            } elseif ($element->getType() === 'upload') {
+                $form->addUpload($element->getName(), $element->getLabel());
             }
 
             $form[$element->getName()]->getControlPrototype()->addClass('form-control');
@@ -151,6 +153,7 @@ class FormPresenter extends \FrontendModule\BasePresenter
     public function formSubmitted($form)
     {
         $values = $form->getValues();
+        $userAttachments = false;
 
         if (!array_key_exists('realHash', $_POST) || \WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
             $data = array();
@@ -168,6 +171,19 @@ class FormPresenter extends \FrontendModule\BasePresenter
                     $value = $val ? $this->translation['Yes'] : $this->translation['No'];
                 } else {
                     $value = $val;
+                }
+
+                if ($element->getType() === 'upload' && !empty($val->getName())) {
+
+                    $filePath = './upload/form/' . $val->getSanitizedName();
+                    $val->move($filePath);
+
+                    $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $val->getSanitizedName();
+
+                    $userAttachments = true;
+                    $userAttachmentsName = $val->getSanitizedName();
+                    $userAttachmentsPath = $filePath;
+
                 }
 
                 $data[$element->getLabel()] = $value;
@@ -260,6 +276,11 @@ class FormPresenter extends \FrontendModule\BasePresenter
                 foreach ($attachments as $attachment) {
                     $mail->addAttachment($attachment->getName(), file_get_contents(WWW_DIR.$attachment->getPath()));
                 }
+            }
+
+            //user attachments
+            if ($userAttachments) {
+                $mail->addAttachment($userAttachmentsName, file_get_contents(WWW_DIR.$userAttachmentsPath));
             }
 
             try {
