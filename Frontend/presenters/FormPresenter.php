@@ -172,19 +172,23 @@ class FormPresenter extends \FrontendModule\BasePresenter
                 } else {
                     $value = $val;
                 }
-                
-                $isUpload = $element->getType() === 'upload' && !empty($val->getName());
 
-                if ($isUpload) {
+                if ($element->getType() === 'upload') {
 
-                    $filePath = './upload/form/' . $val->getSanitizedName();
-                    $val->move($filePath);
+                    $isUploadFilled = !empty($val->getName());
 
-                    $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $val->getSanitizedName();
+                    if ($isUploadFilled) {
 
-                    $userAttachments = true;
-                    $userAttachmentsName = $val->getSanitizedName();
-                    $userAttachmentsPath = $filePath;
+                        $filePath = './upload/form/' . $val->getSanitizedName();
+                        $val->move($filePath);
+
+                        $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $val->getSanitizedName();
+
+                        $userAttachments = true;
+                        $userAttachmentsName = $val->getSanitizedName();
+                        $userAttachmentsPath = $filePath;
+
+                    }
 
                 }
 
