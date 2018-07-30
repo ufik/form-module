@@ -172,8 +172,10 @@ class FormPresenter extends \FrontendModule\BasePresenter
                 } else {
                     $value = $val;
                 }
+                
+                $isUpload = $element->getType() === 'upload' && !empty($val->getName());
 
-                if ($element->getType() === 'upload' && !empty($val->getName())) {
+                if ($isUpload) {
 
                     $filePath = './upload/form/' . $val->getSanitizedName();
                     $val->move($filePath);
