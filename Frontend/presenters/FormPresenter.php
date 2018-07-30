@@ -175,7 +175,9 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
                 if ($element->getType() === 'upload') {
 
-                    $isUploadFilled = !empty($val->getName());
+                    $valName = $val->getName();
+
+                    $isUploadFilled = !empty($valName);
 
                     if ($isUploadFilled) {
 
