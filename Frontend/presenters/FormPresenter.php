@@ -181,10 +181,12 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
                     if ($isUploadFilled) {
 
-                        $filePath = './upload/form/' . $val->getSanitizedName();
+                        $hash = md5($val->getSanitizedName());
+
+                        $filePath = './upload/form/' . $hash . $val->getSanitizedName();
                         $val->move($filePath);
 
-                        $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $val->getSanitizedName();
+                        $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $hash . $val->getSanitizedName();
 
                         $userAttachments = true;
                         $userAttachmentsName = $val->getSanitizedName();
