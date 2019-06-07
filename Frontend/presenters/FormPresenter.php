@@ -152,161 +152,152 @@ class FormPresenter extends \FrontendModule\BasePresenter
 
     public function formSubmitted($form)
     {
-        $values = $form->getValues();
-        $userAttachments = false;
 
-        if (!array_key_exists('realHash', $_POST) || \WebCMS\Helpers\SystemHelper::rpHash($_POST['real']) == $_POST['realHash']) {
-            $data = array();
+        if (isset($_POST['g-recaptcha-response'])) {
 
-            $redirect = $values->redirect;
-            $contactId = $values->contactId;
-            unset($values->redirect);
-            unset($values->contactId);
+            $values = $form->getValues();
 
-            $emailContent = '';
-            foreach ($values as $key => $val) {
-                $element = $this->elementRepository->findOneByName($key);
+            $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+            $recaptcha_secret = '6LcTXqIUAAAAAIPPkphyoLD1sJaq3-CZCYBnQ5kE';
+            $recaptcha_response = $_POST['g-recaptcha-response'];
 
-                if ($element->getType() === 'checkbox') {
-                    $value = $val ? $this->translation['Yes'] : $this->translation['No'];
-                } else {
-                    $value = $val;
-                }
+            $recaptcha = file_get_contents($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
+            $recaptcha = json_decode($recaptcha);
 
-                if ($element->getType() === 'upload') {
+            if ($recaptcha->score >= 0.5) {
 
-                    $valName = $val->getName();
+                $data = array();
 
-                    $isUploadFilled = !empty($valName);
+                $redirect = $values->redirect;
+                $contactId = $values->contactId;
+                unset($values->redirect);
+                unset($values->contactId);
 
-                    if ($isUploadFilled) {
+                $emailContent = '';
+                foreach ($values as $key => $val) {
+                    $element = $this->elementRepository->findOneByName($key);
 
-                        $hash = md5($val->getSanitizedName());
-
-                        $filePath = './upload/form/' . $hash . $val->getSanitizedName();
-                        $val->move($filePath);
-
-                        $value = $_SERVER['HTTP_REFERER'] . 'upload/form/' . $hash . $val->getSanitizedName();
-
-                        $userAttachments = true;
-                        $userAttachmentsName = $val->getSanitizedName();
-                        $userAttachmentsPath = $filePath;
-
+                    if ($element->getType() === 'checkbox') {
+                        $value = $val ? $this->translation['Yes'] : $this->translation['No'];
+                    } else {
+                        $value = $val;
                     }
 
+                    $data[$element->getLabel()] = $value;
+
+                    $emailContent .= $element->getLabel().' '.$value.'<br />';
                 }
 
-                $data[$element->getLabel()] = $value;
+                $entry = new \WebCMS\FormModule\Entity\Entry();
+                $entry->setDate(new \DateTime());
+                $entry->setPage($this->actualPage);
+                $entry->setData($data);
 
-                $emailContent .= $element->getLabel().' '.$value.'<br />';
-            }
+                $this->em->persist($entry);
+                $this->em->flush();
 
-            $entry = new \WebCMS\FormModule\Entity\Entry();
-            $entry->setDate(new \DateTime());
-            $entry->setPage($this->actualPage);
-            $entry->setData($data);
+                // info email
+                if (is_numeric($contactId)) {
+                    $contact = $this->contactRepository->find($contactId);
+                    $infoMail = $contact->getEmail();
+                } else {
+                    $infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
+                    $infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
+                    $parsed = explode('@', $infoMail);
+                }
 
-            $this->em->persist($entry);
-            $this->em->flush();
+                $sendToUser = $this->settings->get('Info send to user', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
+                $sendToAdmin = $this->settings->get('Info send to admin', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
 
-            // info email
-            if (is_numeric($contactId)) {
-                $contact = $this->contactRepository->find($contactId);
-                $infoMail = $contact->getEmail();
-            } else {
-                $infoMail = $this->settings->get('Info email', 'basic', 'text')->getValue();
-                $infoMail = \WebCMS\Helpers\SystemHelper::replaceStatic($infoMail);
-                $parsed = explode('@', $infoMail);
-            }
+                $mailBody = $this->settings->get('Info email', 'formModule'.$this->actualPage->getId(), 'textarea')->getValue();
+                $mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
 
-            $sendToUser = $this->settings->get('Info send to user', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
-            $sendToAdmin = $this->settings->get('Info send to admin', 'formModule'.$this->actualPage->getId(), 'checkbox')->getValue();
-
-            $mailBody = $this->settings->get('Info email', 'formModule'.$this->actualPage->getId(), 'textarea')->getValue();
-            $mailBody = \WebCMS\Helpers\SystemHelper::replaceStatic($mailBody, array('[FORM_CONTENT]'), array($emailContent));
-
-            $mail = new \Nette\Mail\Message();
-            if ($sendToAdmin) {
-                $mail->addTo($infoMail);
-            }
-            if ($sendToUser) {
-               foreach ($data as $key => $value) {
-                    if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        $mail->addTo($value);
-                        break;
+                $mail = new \Nette\Mail\Message();
+                if ($sendToAdmin) {
+                    $mail->addTo($infoMail);
+                }
+                if ($sendToUser) {
+                foreach ($data as $key => $value) {
+                        if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $mail->addTo($value);
+                            break;
+                        }
                     }
                 }
-            }
 
-            $mailFrom = $this->settings->get('Info email FROM address', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
-            $mailFromName = $this->settings->get('Info email FROM name', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
+                $mailFrom = $this->settings->get('Info email FROM address', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
+                $mailFromName = $this->settings->get('Info email FROM name', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
 
-            if (!empty($mailFrom)) {
-                $mail->setFrom($mailFrom, $mailFromName);
-            } else {
-                $domain = str_replace('www.', '', $this->getHttpRequest()->url->host); // TODO: this doesn't work if the host is IP address = no default fallback
-                if ($domain !== 'localhost') {
-                    $mail->setFrom('no-reply@'.$domain);
+                if (!empty($mailFrom)) {
+                    $mail->setFrom($mailFrom, $mailFromName);
                 } else {
-                    $mail->setFrom('no-reply@test.cz');
+                    $domain = str_replace('www.', '', $this->getHttpRequest()->url->host); // TODO: this doesn't work if the host is IP address = no default fallback
+                    if ($domain !== 'localhost') {
+                        $mail->setFrom('no-reply@'.$domain);
+                    } else {
+                        $mail->setFrom('no-reply@test.cz');
+                    }
                 }
-            }
 
-            $mailReplyTo = $this->settings->get('Info email REPLYTO address', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
-            $mailReplyToName = $this->settings->get('Info email REPLYTO name', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
+                $mailReplyTo = $this->settings->get('Info email REPLYTO address', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
+                $mailReplyToName = $this->settings->get('Info email REPLYTO name', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
 
-            if (!empty($mailReplyTo)) {
-                $mail->addReplyTo($mailReplyTo, $mailReplyToName);
-            }
-
-            $mailCc = $this->settings->get('Info email CC recipients', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
-
-            if (!empty($mailCc)) {
-                $cc = explode(';', $mailCc);
-                foreach ($cc as $key => $value) {
-                    $mail->addCc($value);
+                if (!empty($mailReplyTo)) {
+                    $mail->addReplyTo($mailReplyTo, $mailReplyToName);
                 }
-            }
 
-            $mailBcc = $this->settings->get('Info email BCC recipients', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
+                $mailCc = $this->settings->get('Info email CC recipients', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
 
-            if (!empty($mailBcc)) {
-                $bcc = explode(';', $mailBcc);
-                foreach ($bcc as $key => $value) {
-                    $mail->addBcc($value);
+                if (!empty($mailCc)) {
+                    $cc = explode(';', $mailCc);
+                    foreach ($cc as $key => $value) {
+                        $mail->addCc($value);
+                    }
                 }
-            }
 
-            $mail->setSubject($this->settings->get('Info email subject', 'formModule'.$this->actualPage->getId(), 'text')->getValue());
-            $mail->setHtmlBody($mailBody);
+                $mailBcc = $this->settings->get('Info email BCC recipients', 'formModule'.$this->actualPage->getId(), 'text')->getValue();
 
-            //attachments
-            $attachments = $this->attachmentRepository->findAll();
-            if ($attachments) {
-                foreach ($attachments as $attachment) {
-                    $mail->addAttachment($attachment->getName(), file_get_contents(WWW_DIR.$attachment->getPath()));
+                if (!empty($mailBcc)) {
+                    $bcc = explode(';', $mailBcc);
+                    foreach ($bcc as $key => $value) {
+                        $mail->addBcc($value);
+                    }
                 }
-            }
 
-            //user attachments
-            if ($userAttachments) {
-                $mail->addAttachment($userAttachmentsName, file_get_contents(WWW_DIR.$userAttachmentsPath));
-            }
+                $mail->setSubject($this->settings->get('Info email subject', 'formModule'.$this->actualPage->getId(), 'text')->getValue());
+                $mail->setHtmlBody($mailBody);
 
-            try {
-                $mail->send();
-                $this->flashMessage('Data has been sent.', 'success');
-                
-            } catch (\Exception $e) {
-                $this->flashMessage('Cannot send email.', 'danger');
-            }
+                //attachments
+                $attachments = $this->attachmentRepository->findAll();
+                if ($attachments) {
+                    foreach ($attachments as $attachment) {
+                        $mail->addAttachment($attachment->getName(), file_get_contents(WWW_DIR.$attachment->getPath()));
+                    }
+                }
 
-            if (!$redirect) {
-                $this->redirect('default', array(
-                    'path' => $this->actualPage->getPath(),
-                    'abbr' => $this->abbr,
-                ));
+                try {
+                    $mail->send();
+                    $this->flashMessage('Data has been sent.', 'success');
+                    
+                } catch (\Exception $e) {
+                    $this->flashMessage('Cannot send email.', 'danger');
+                }
+
+                if (!$redirect) {
+                    $this->redirect('default', array(
+                        'path' => $this->actualPage->getPath(),
+                        'abbr' => $this->abbr,
+                    ));
+                } else {
+                    $httpRequest = $this->getContext()->getService('httpRequest');
+
+                    $url = $httpRequest->getReferer();
+                    $url->appendQuery(array(self::FLASH_KEY => $this->getParam(self::FLASH_KEY)));
+
+                    $this->redirectUrl($url->absoluteUrl);
+                }
             } else {
+                    $this->flashMessage('Wrong protection code.', 'danger');
                 $httpRequest = $this->getContext()->getService('httpRequest');
 
                 $url = $httpRequest->getReferer();
