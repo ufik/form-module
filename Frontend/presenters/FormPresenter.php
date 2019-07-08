@@ -158,13 +158,13 @@ class FormPresenter extends \FrontendModule\BasePresenter
             $values = $form->getValues();
 
             $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
-            $recaptcha_secret = '6LcTXqIUAAAAAIPPkphyoLD1sJaq3-CZCYBnQ5kE';
+            $recaptcha_secret = $this->settings->get('Google API key', 'basic', 'text')->getValue();
             $recaptcha_response = $_POST['g-recaptcha-response'];
 
             $recaptcha = file_get_contents($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
             $recaptcha = json_decode($recaptcha);
 
-            if ($recaptcha->score >= 0.5) {
+            if ($recaptcha->success) {
 
                 $data = array();
 
